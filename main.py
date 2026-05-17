@@ -55,7 +55,7 @@ def main():
     y_test = idx2numpy.convert_from_file(test_lbl_path)
 
     #posizione del modello salvatoF
-    model_path = "export/mnist_ai_1_0.h5"
+    model_path = "export/mnist_ai_2_0.h5"
 
 
     print(device_lib.list_local_devices()) # stampa i dispositivi disponibili, come CPU e GPU, per verificare se TensorFlow può utilizzare la GPU per l'addestramento del modello
@@ -130,15 +130,22 @@ def main():
 
     model.add(MaxPooling2D(pool_size=(2, 2))) # riduce dmensioni dell'immagine di input di 2x2, prendendo il valore massimo in ogni finestra di 2x2 pixel, il che aiuta a ridurre la complessità del modello e a prevenire l'overfitting
     
+    model.add(Dropout(0.25)) # Dropout per evitare l'overfitting, spegne casualmente il 25% dei neuroni durante l'addestramento, il che aiuta a migliorare la generalizzazione del modello
+    """" il layer Dropout è una tecnica di regolarizzazione che aiuta a prevenire l'overfitting durante l'addestramento del modello, 
+    spegnendo casualmente una frazione dei neuroni del layer durante ogni iterazione di addestramento, 
+    in questo caso il 25% dei neuroni vengono spenti, il che costringe il modello a imparare rappresentazioni più robuste e generalizzabili dei dati, migliorando così le prestazioni del modello sui dati di test"""
+
     model.add(Flatten()) # appiattisce i dati in un vettore 1D, trasformando l'output del layer precedente (che è una matrice 2D) in un vettore 1D che può essere utilizzato come input per i layer densi successivi
 
     model.add(Dense(128, activation = 'relu')) # layer denso completamente connesso con 128 neuroni e funzione di attivazione ReLU, che aiuta a catturare le relazioni non lineari nei dati
+
+    model.add(Dropout(0.5)) # Dropout per evitare l'overfitting, spegne casualmente il 50% dei neuroni durante l'addestramento
 
     model.add(Dense(num_classes, activation = 'softmax')) # produce probabilità per ciascuna delle 10 classi (cifre da 0 a 9) utilizzando la funzione di attivazione softmax, che normalizza le uscite in modo che la somma delle probabilità sia uguale a 1
 
     # compila il modello
     model.compile(loss = 'categorical_crossentropy', # funzione di perdita utilizzata per problemi di classificazione multi-classe, che misura la differenza tra le probabilità previste dal modello e le etichette reali in formato one-hot encoding
-                optimizer = SGD(0.001), # algoritmo di ottimizzazione Stochastic Gradient Descent con un tasso di apprendimento di 0.001, che viene utilizzato per aggiornare i pesi del modello durante l'addestramento
+                optimizer = 'adam', # algoritmo di ottimizzazione Stochastic Gradient Descent con un tasso di apprendimento di 0.001, che viene utilizzato per aggiornare i pesi del modello durante l'addestramento
                 metrics = ['accuracy']) # metrica utilizzata per valutare le prestazioni del modello durante l'addestramento e il test, in questo caso l'accuratezza, che misura la percentuale di previsioni corrette rispetto al totale delle previsioni
     
     print(model.summary()) # stampa un riepilogo del modello, mostra struttura rete neurale, numero di parametri e forma di output di ogni layer
